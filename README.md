@@ -16,8 +16,8 @@ This repository contains the code and documentation for our cloud-based photo ga
 
 ## Team Roles
 
-- **Role 1 (Project Manager):** [Lexi Pachonphai]
-- **Role 2 (Database Engineer):** [Name]
-- **Role 3 (Backend Developer):** [Name]
-- **Role 4 (Frontend Developer):** [Name]
-- **Role 5 (DevOps Engineer):** [Name]
+- **Project Manager / Cloud Coordinator:** Lexi Pachonphai
+- **Database Engineer (Cloud SQL):** Mia Vogel
+- **Backend Developer:** Thabang Pila
+- **Frontend Developer:** Julia Young
+- **DevOps / Deployment Engineer:** Phuong Tran
