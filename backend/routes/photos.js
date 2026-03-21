@@ -57,4 +57,22 @@ router.get('/my/:user_id', (req, res) => {
   });
 });
 
+// Search photos by keyword in name or description
+router.get('/search', (req, res) => {
+  // Get the keyword from the query string (e.g. /search?keyword=coach)
+  const { keyword } = req.query;
+
+  // Wrap keyword in % wildcards for partial matching
+  const search = '%' + keyword + '%';
+  const sql = 'SELECT * FROM photos WHERE photo_name LIKE ? OR description LIKE ?';
+
+  pool.query(sql, [search, search], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    // Return all matching photos
+    res.status(200).json(results);
+  });
+});
+
 module.exports = router;
