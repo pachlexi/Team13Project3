@@ -13,6 +13,10 @@ const app = express();
 // Parse incoming JSON request bodies
 app.use(express.json());
 
+// Import auth routes (register, login)
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
+
 // Use PORT from .env or default to 3000
 const PORT = process.env.PORT || 3000;
 
