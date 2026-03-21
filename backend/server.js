@@ -17,6 +17,10 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
+// Import photo routes (upload, search, download, list)
+const photoRoutes = require('./routes/photos');
+app.use('/api/photos', photoRoutes);
+
 // Use PORT from .env or default to 3000
 const PORT = process.env.PORT || 3000;
 
