@@ -42,4 +42,19 @@ router.post('/upload', upload.single('photo'), (req, res) => {
   });
 });
 
+// Get all photos for a specific user
+router.get('/my/:user_id', (req, res) => {
+  // Get user_id from the URL (e.g. /my/5)
+  const { user_id } = req.params;
+  const sql = 'SELECT * FROM photos WHERE user_id = ?';
+
+  pool.query(sql, [user_id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    // Return all photos belonging to this user
+    res.status(200).json(results);
+  });
+});
+
 module.exports = router;
