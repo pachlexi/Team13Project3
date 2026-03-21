@@ -4,11 +4,17 @@ require('dotenv').config();
 // Import Express framework
 const express = require('express');
 
+// Import cors to allow requests from the frontend (different origin)
+const cors = require('cors');
+
 // Import the database connection pool
 const pool = require('./db');
 
 // Create the Express application instance
 const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
 
 // Parse incoming JSON request bodies
 app.use(express.json());

@@ -75,4 +75,29 @@ router.get('/search', (req, res) => {
   });
 });
 
+// Download a photo by its ID
+router.get('/download/:photo_id', (req, res) => {
+  // Get photo_id from the URL (e.g. /download/2)
+  const { photo_id } = req.params;
+  const sql = 'SELECT photo_name, file_path FROM photos WHERE photo_id = ?';
+
+  pool.query(sql, [photo_id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    // No photo found with that ID
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Photo not found' });
+    }
+    const { photo_name, file_path } = results[0];
+
+    // Send the file from disk as a downloadable attachment
+    res.download(file_path, photo_name, (err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to download file' });
+      }
+    });
+  });
+});
+
 module.exports = router;
