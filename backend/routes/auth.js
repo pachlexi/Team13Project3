@@ -10,6 +10,8 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   // Extract fields from the request body
   const { username, email, password } = req.body;
+  // Log the registration request body
+  console.log('Register request:', req.body);
 
   // Hash the password before storing it (10 = salt rounds)
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -30,12 +32,15 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   // Extract email and password from the request body
   const { email, password } = req.body;
+  // Log the login request body
+  console.log('Login request:', req.body);
 
   // Look up the user by email
   const sql = 'SELECT user_id, username, email, password FROM users WHERE email = ?';
 
   pool.query(sql, [email], async (err, results) => {
     if (err) {
+      console.error('Login DB error:', err);
       return res.status(500).json({ error: err.message });
     }
     // No user found with that email
