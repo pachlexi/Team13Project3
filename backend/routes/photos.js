@@ -1,6 +1,7 @@
 // Import Express, multer for file uploads, and the database pool
 const express = require('express');
 const multer = require('multer');
+const path = require('path');
 const pool = require('../db');
 
 // Configure where and how uploaded files are stored on disk
@@ -21,10 +22,7 @@ const router = express.Router();
 
 // Upload a photo and save its metadata to the database
 router.post('/upload', upload.single('photo'), (req, res) => {
-  // Extract metadata from the request body
   const { user_id, photo_name, description } = req.body;
-
-  // Build the file path from the saved file's name
   const file_path = 'uploads/' + req.file.filename;
 
   const sql = 'INSERT INTO photos (user_id, photo_name, file_path, description) VALUES (?, ?, ?, ?)';
@@ -33,7 +31,7 @@ router.post('/upload', upload.single('photo'), (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    // Return success with the new photo's ID and path
+
     res.status(201).json({
       message: 'Photo uploaded successfully',
       photoId: result.insertId,
@@ -44,7 +42,6 @@ router.post('/upload', upload.single('photo'), (req, res) => {
 
 // Get all photos for a specific user
 router.get('/my/:user_id', (req, res) => {
-  // Get user_id from the URL (e.g. /my/5)
   const { user_id } = req.params;
   const sql = 'SELECT * FROM photos WHERE user_id = ?';
 
@@ -52,17 +49,13 @@ router.get('/my/:user_id', (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    // Return all photos belonging to this user
     res.status(200).json(results);
   });
 });
 
 // Search photos by keyword in name or description
 router.get('/search', (req, res) => {
-  // Get the keyword from the query string (e.g. /search?keyword=coach)
   const { keyword } = req.query;
-
-  // Wrap keyword in % wildcards for partial matching
   const search = '%' + keyword + '%';
   const sql = 'SELECT * FROM photos WHERE photo_name LIKE ? OR description LIKE ?';
 
@@ -70,14 +63,12 @@ router.get('/search', (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    // Return all matching photos
     res.status(200).json(results);
   });
 });
 
 // Download a photo by its ID
 router.get('/download/:photo_id', (req, res) => {
-  // Get photo_id from the URL (e.g. /download/2)
   const { photo_id } = req.params;
   const sql = 'SELECT photo_name, file_path FROM photos WHERE photo_id = ?';
 
@@ -85,14 +76,16 @@ router.get('/download/:photo_id', (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    // No photo found with that ID
+
     if (results.length === 0) {
       return res.status(404).json({ error: 'Photo not found' });
     }
-    const { photo_name, file_path } = results[0];
 
-    // Send the file from disk as a downloadable attachment
-    res.download(file_path, photo_name, (err) => {
+    const { photo_name, file_path } = results[0];
+    const ext = path.extname(file_path);
+    const downloadName = `${photo_name}${ext}`;
+
+    res.download(file_path, downloadName, (err) => {
       if (err) {
         return res.status(500).json({ error: 'Failed to download file' });
       }

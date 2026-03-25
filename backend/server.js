@@ -19,6 +19,9 @@ app.use(cors());
 // Parse incoming JSON request bodies
 app.use(express.json());
 
+// Serve uploaded images
+app.use('/uploads', express.static('uploads'));
+
 // Import auth routes (register, login)
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);

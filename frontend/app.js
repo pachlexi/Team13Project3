@@ -6,7 +6,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
   try {
     console.log('Login request data:', { email, password });
-    const res = await fetch("http://localhost:3000/api/auth/login", {
+    const res = await fetch("http://34.60.237.251:3000/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -40,7 +40,7 @@ document.getElementById("registerForm")?.addEventListener("submit", async (e) =>
   const password = document.getElementById("password").value;
 
   console.log('Register request data:', { username, email, password });
-  const res = await fetch("http://localhost:3000/api/auth/register", {
+  const res = await fetch("http://34.60.237.251:3000/api/auth/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -67,7 +67,7 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
   formData.append("photo_name", document.getElementById("photo_name").value);
   formData.append("description", document.getElementById("description").value);
 
-  const res = await fetch("http://localhost:3000/api/photos/upload", {
+  const res = await fetch("http://34.60.237.251:3000/api/photos/upload", {
     method: "POST",
     body: formData
   });
@@ -84,15 +84,18 @@ async function loadGallery() {
   if (!gallery) return;
 
   const userId = localStorage.getItem("userId");
-
-  const res = await fetch(`http://localhost:3000/api/photos/my/${userId}`);
+  const res = await fetch(`http://34.60.237.251:3000/api/photos/my/${userId}`);
   const photos = await res.json();
 
   gallery.innerHTML = "";
 
   photos.forEach(photo => {
     const div = document.createElement("div");
-    div.innerHTML = `<p>${photo.photo_name}</p>`;
+    div.innerHTML = `
+      <p>${photo.photo_name}</p>
+      <img src="http://34.60.237.251:3000/${photo.file_path}" width="200" alt="${photo.photo_name}" />
+      <p>${photo.description || ""}</p>
+    `;
     gallery.appendChild(div);
   });
 }
@@ -102,7 +105,7 @@ loadGallery();
 async function search() {
   const keyword = document.getElementById("keyword").value;
 
-  const res = await fetch(`http://localhost:3000/api/photos/search?keyword=${keyword}`);
+  const res = await fetch(`http://34.60.237.251:3000/api/photos/search?keyword=${keyword}`);
   const photos = await res.json();
 
   const results = document.getElementById("results");
@@ -114,5 +117,5 @@ async function search() {
 }
 
 function downloadPhoto(photoId) {
-  window.location.href = `http://localhost:3000/api/photos/download/${photoId}`;
+  window.location.href = `http://34.60.237.251:3000/api/photos/download/${photoId}`;
 }
