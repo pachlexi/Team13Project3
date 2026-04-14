@@ -33,6 +33,17 @@ app.use('/api/photos', photoRoutes);
 // Use PORT from .env or default to 3000
 const PORT = process.env.PORT || 3000;
 
+// test db connection
+app.get('/test-db', (req, res) => {
+  pool.query('SELECT 1 AS test', (err, results) => {
+    if (err) {
+      console.error('DB ERROR:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(results);
+  });
+});
+
 // Start the server and listen for incoming requests
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
