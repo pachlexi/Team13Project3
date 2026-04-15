@@ -1,0 +1,11 @@
+runtime: nodejs22
+service: default
+
+env_variables:
+  DB_USER: root
+  DB_PASSWORD: "RootTeam13_2026!"
+  DB_NAME: photo_gallery
+  INSTANCE_CONNECTION_NAME: team13project3:us-central1:project-3-db
+
+beta_settings:
+  cloud_sql_instances: team13project3:us-central1:project-3-db

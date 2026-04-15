@@ -1,5 +1,7 @@
-// Change this to App Engine URL when deploying
-const BASE_URL = "http://localhost:3000";
+// Use same-origin on App Engine, localhost during local development.
+const BASE_URL = window.location.hostname.includes("appspot.com")
+  ? ""
+  : "http://localhost:3000";
 
 // --- AUTHENTICATION & NAVIGATION LOGIC ---
 function checkAuth() {

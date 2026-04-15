@@ -3,6 +3,7 @@ require('dotenv').config();
 
 // Import Express framework
 const express = require('express');
+const path = require('path');
 
 // Import cors to allow requests from the frontend (different origin)
 const cors = require('cors');
@@ -18,6 +19,9 @@ app.use(cors());
 
 // Parse incoming JSON request bodies
 app.use(express.json());
+
+// Serve the team's original frontend folder.
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // Serve uploaded images
 app.use('/uploads', express.static('uploads'));
