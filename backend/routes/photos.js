@@ -100,10 +100,25 @@ router.get("/download/:photo_id", (req, res) => {
 
     // Check if the file is a cloud URL or a legacy local file
     if (file_path.startsWith("http")) {
-      // Native browser redirect to the Cloud Storage URL
-      res.redirect(file_path);
+      // Extract the exact filename from the end of the Google Cloud URL
+      const fileName = file_path.split("/").pop();
+
+      // Tell the browser "Do NOT display this, download it as an attachment!"
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="Cloud_${photo_name}.jpg"`,
+      );
+
+      // Stream the file directly from the Cloud Storage bucket to the user
+      bucket
+        .file(fileName)
+        .createReadStream()
+        .on("error", (err) =>
+          res.status(500).json({ error: "Failed to stream cloud file" }),
+        )
+        .pipe(res);
     } else {
-      // Fallback for the old local files just in case
+      // Fallback for the old legacy local files (like Kitty and Russian Blue)
       const ext = path.extname(file_path);
       const downloadName = `${photo_name}${ext}`;
       res.download(file_path, downloadName, (err) => {

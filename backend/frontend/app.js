@@ -10,7 +10,9 @@ function checkAuth() {
   const privateLinks = document.querySelectorAll(".private-link");
 
   // Get the current page name from the URL
-  const currentPage = window.location.pathname.split("/").pop();
+  // If it's empty (just the base domain), default it to index.html
+  let currentPage = window.location.pathname.split("/").pop();
+  if (currentPage === "") currentPage = "index.html";
 
   // Define which pages require a login
   const protectedPages = [
@@ -20,10 +22,18 @@ function checkAuth() {
     "photodetail.html",
   ];
 
+  // Define pages meant only for logged-out users
+  const authPages = ["index.html", "register.html"];
+
   if (userId) {
     // User IS logged in: hide public links, show private links
     publicLinks.forEach((link) => (link.style.display = "none"));
     privateLinks.forEach((link) => (link.style.display = "inline-block"));
+
+    // Auto-redirect: If logged in but on the login/register page, go to gallery
+    if (authPages.includes(currentPage)) {
+      window.location.href = "gallery.html";
+    }
   } else {
     // User IS NOT logged in: show public links, hide private links
     publicLinks.forEach((link) => (link.style.display = "inline-block"));
