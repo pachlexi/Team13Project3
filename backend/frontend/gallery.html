@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My Gallery</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="animate.css" />
+  </head>
+  <body>
+    <nav class="top-nav">
+      <div class="logo">Team 13: Project 4</div>
+      <div class="nav-links">
+        <a href="index.html" class="public-link">Login</a>
+        <a href="register.html" class="public-link">Register</a>
+
+        <a href="gallery.html" class="private-link" style="display: none"
+          >My Photos</a
+        >
+        <a href="upload.html" class="private-link" style="display: none"
+          >Upload</a
+        >
+        <a href="search.html" class="private-link" style="display: none"
+          >Search</a
+        >
+        <a href="#" id="logoutBtn" class="private-link" style="display: none"
+          >Logout</a
+        >
+      </div>
+    </nav>
+
+    <div
+      class="container animate__animated animate__fadeIn"
+      style="max-width: 800px"
+    >
+      <h2>Your Cloud Gallery</h2>
+      <div id="gallery"></div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
