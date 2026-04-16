@@ -72,15 +72,21 @@ router.get("/my/:user_id", (req, res) => {
   });
 });
 
-// Search photos by keyword in title ONLY
+// Search photos by keyword in title ONLY, filtered by current user
 router.get("/search", (req, res) => {
-  const { keyword } = req.query;
+  const { keyword, user_id } = req.query;
   const search = "%" + keyword + "%";
 
-  // Updated SQL to only search the photo_name column
-  const sql = "SELECT * FROM photos WHERE photo_name LIKE ?";
+  // Check if a user_id was provided from the frontend
+  let sql = "SELECT * FROM photos WHERE photo_name LIKE ?";
+  const params = [search];
 
-  pool.query(sql, [search], (err, results) => {
+  if (user_id) {
+    sql += " AND user_id = ?";
+    params.push(user_id);
+  }
+
+  pool.query(sql, params, (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.status(200).json(results);
   });

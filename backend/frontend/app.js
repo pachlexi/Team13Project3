@@ -180,13 +180,18 @@ async function search() {
   const results = document.getElementById("results");
   if (!results) return;
 
-  // 1. Send the GLOBAL search query using BASE_URL
-  const res = await fetch(`${BASE_URL}/api/photos/search?keyword=${keyword}`);
+  // Grab the logged-in user's ID
+  const userId = localStorage.getItem("userId");
+
+  // Send BOTH the keyword and the user_id to the backend
+  const res = await fetch(
+    `${BASE_URL}/api/photos/search?keyword=${keyword}&user_id=${userId}`,
+  );
   const photos = await res.json();
 
   results.innerHTML = ""; // Clear existing
 
-  // 2. Generate the HTML structure and wrap in a link to the detail page
+  // Generate the HTML structure and wrap in a link to the detail page
   photos.forEach((photo) => {
     // Check if it's a cloud URL or a local path
     const imgSrc = photo.file_path.startsWith("http")
