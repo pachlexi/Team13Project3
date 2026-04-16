@@ -1,33 +1,19 @@
 const express = require("express");
 const multer = require("multer");
-const fs = require("fs");
 const path = require("path");
 const pool = require("../db");
 const { Storage } = require("@google-cloud/storage");
 
 // Initialize Google Cloud Storage
-// GAE automatically handles authentication, so no keyfile is needed
 const storageClient = new Storage();
 const bucketName = "team13project3-gallery-bucket";
 const bucket = storageClient.bucket(bucketName);
 
-// Use memoryStorage instead of diskStorage for serverless deployment
+// Use memoryStorage instead of diskStorage for the serverless deployment
 const multerStorage = multer.memoryStorage();
 const upload = multer({ storage: multerStorage });
 
 const router = express.Router();
-
-function filePathIsUsable(filePath) {
-  if (!filePath) return false;
-
-  // Cloud storage URLs are the current source of truth for serverless uploads.
-  if (filePath.startsWith("https://storage.googleapis.com/")) return true;
-
-  // Legacy local uploads are only usable if the file still exists on disk.
-  const normalized = filePath.replace(/^\//, "");
-  const absolutePath = path.join(__dirname, "..", normalized);
-  return fs.existsSync(absolutePath);
-}
 
 // Upload a photo and save its metadata to the database
 router.post("/upload", upload.single("photo"), (req, res) => {
@@ -61,9 +47,7 @@ router.post("/upload", upload.single("photo"), (req, res) => {
       sql,
       [user_id, photo_name, publicUrl, description],
       (err, result) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
+        if (err) return res.status(500).json({ error: err.message });
 
         res.status(201).json({
           message: "Photo uploaded successfully",
@@ -74,7 +58,6 @@ router.post("/upload", upload.single("photo"), (req, res) => {
     );
   });
 
-  // Write the file buffer to the stream
   blobStream.end(req.file.buffer);
 });
 
@@ -84,27 +67,22 @@ router.get("/my/:user_id", (req, res) => {
   const sql = "SELECT * FROM photos WHERE user_id = ?";
 
   pool.query(sql, [user_id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    const filtered = results.filter((photo) => filePathIsUsable(photo.file_path));
-    res.status(200).json(filtered);
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(200).json(results);
   });
 });
 
-// Search photos by keyword in name or description
+// Search photos by keyword in title ONLY
 router.get("/search", (req, res) => {
   const { keyword } = req.query;
   const search = "%" + keyword + "%";
-  const sql =
-    "SELECT * FROM photos WHERE photo_name LIKE ? OR description LIKE ?";
 
-  pool.query(sql, [search, search], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    const filtered = results.filter((photo) => filePathIsUsable(photo.file_path));
-    res.status(200).json(filtered);
+  // Updated SQL to only search the photo_name column
+  const sql = "SELECT * FROM photos WHERE photo_name LIKE ?";
+
+  pool.query(sql, [search], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(200).json(results);
   });
 });
 
@@ -114,18 +92,25 @@ router.get("/download/:photo_id", (req, res) => {
   const sql = "SELECT photo_name, file_path FROM photos WHERE photo_id = ?";
 
   pool.query(sql, [photo_id], (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    if (results.length === 0) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (results.length === 0)
       return res.status(404).json({ error: "Photo not found" });
+
+    const { photo_name, file_path } = results[0];
+
+    // Check if the file is a cloud URL or a legacy local file
+    if (file_path.startsWith("http")) {
+      // Native browser redirect to the Cloud Storage URL
+      res.redirect(file_path);
+    } else {
+      // Fallback for the old local files just in case
+      const ext = path.extname(file_path);
+      const downloadName = `${photo_name}${ext}`;
+      res.download(file_path, downloadName, (err) => {
+        if (err)
+          return res.status(500).json({ error: "Failed to download file" });
+      });
     }
-
-    const { file_path } = results[0];
-
-    // Since file_path is now a public URL, redirect the browser to it natively
-    res.redirect(file_path);
   });
 });
 
