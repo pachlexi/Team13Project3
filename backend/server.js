@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "frontend")));
 
 // Serve uploaded images
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import auth routes (register, login)
 const authRoutes = require("./routes/auth");

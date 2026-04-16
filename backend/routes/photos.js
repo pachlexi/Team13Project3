@@ -1,5 +1,7 @@
 const express = require("express");
 const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 const pool = require("../db");
 const { Storage } = require("@google-cloud/storage");
 
@@ -14,6 +16,18 @@ const multerStorage = multer.memoryStorage();
 const upload = multer({ storage: multerStorage });
 
 const router = express.Router();
+
+function filePathIsUsable(filePath) {
+  if (!filePath) return false;
+
+  // Cloud storage URLs are the current source of truth for serverless uploads.
+  if (filePath.startsWith("https://storage.googleapis.com/")) return true;
+
+  // Legacy local uploads are only usable if the file still exists on disk.
+  const normalized = filePath.replace(/^\//, "");
+  const absolutePath = path.join(__dirname, "..", normalized);
+  return fs.existsSync(absolutePath);
+}
 
 // Upload a photo and save its metadata to the database
 router.post("/upload", upload.single("photo"), (req, res) => {
@@ -73,7 +87,8 @@ router.get("/my/:user_id", (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.status(200).json(results);
+    const filtered = results.filter((photo) => filePathIsUsable(photo.file_path));
+    res.status(200).json(filtered);
   });
 });
 
@@ -88,7 +103,8 @@ router.get("/search", (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.status(200).json(results);
+    const filtered = results.filter((photo) => filePathIsUsable(photo.file_path));
+    res.status(200).json(filtered);
   });
 });
 
